@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <div class="h1">Details Anomaly</div>
+    <div class="muted">Tabel anomali (500 data terbaru)</div>
+  </div>
+
+  <form class="filter glass" method="get" action="{{ url_for('anomalies') }}">
+    <div class="row g-2 align-items-end">
+      <div class="col-auto">
+        <div class="mini muted">Sumber</div>
+        <select class="form-select form-select-sm" name="source">
+          <option value="harvested" {% if source=='harvested' %}selected{% endif %}>API_Harvest_2023_2025.csv</option>
+          <option value="default" {% if source=='default' %}selected{% endif %}>Data_Lengkap.csv</option>
+        </select>
+      </div>
+
+      <div class="col-auto">
+        <div class="mini muted">Dari</div>
+        <input class="form-control form-control-sm" type="date" name="start" value="{{ start }}">
+      </div>
+
+      <div class="col-auto">
+        <div class="mini muted">Sampai</div>
+        <input class="form-control form-control-sm" type="date" name="end" value="{{ end }}">
+      </div>
+
+      <div class="col-auto">
+        <button class="btn btn-primary btn-sm"><i class="bi bi-filter"></i> Apply</button>
+      </div>
+
+      <div class="col-auto">
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('download_anomalies', source=source, start=start, end=end) }}">
+          <i class="bi bi-download"></i> Download CSV
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="panel glass">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Status Hari</th>
+          <th class="text-end">Total Konsumsi (kWh)</th>
+          <th>Kategori Anomali</th>
+          <th class="text-end">Severity (IF Score)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.ts }}</td>
+          <td>
+            <span class="badge {% if r.status_hari=='Hari Libur' %}bg-secondary{% else %}bg-primary{% endif %}">
+              {{ r.status_hari }}
+            </span>
+          </td>
+          <td class="text-end">{{ "{:,.2f}".format(r.kwh).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+          <td>
+            <span class="badge {% if r.anom_category=='HIGH_USAGE' %}bg-danger{% elif r.anom_category=='LOW_USAGE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+              {{ r.anom_category }}
+            </span>
+          </td>
+          <td class="text-end">{{ "{:,.6f}".format(r.score).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

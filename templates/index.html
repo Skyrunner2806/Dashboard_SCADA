@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set active = "home" %}
+{% set header = "Dashboard Deteksi Anomali Konsumsi Energi" %}
+{% block content %}
+
+<form class="card p-3 filter-card" method="get" action="{{ url_for('index') }}">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label">Sumber data</label>
+      <select name="source" class="form-select">
+        <option value="harvested" {% if source=='harvested' %}selected{% endif %}>API_Harvest_2023_2025.csv</option>
+        <option value="default" {% if source=='default' %}selected{% endif %}>Data_Lengkap.csv</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Agregasi</label>
+      <select name="freq" class="form-select">
+        <option value="H" {% if freq=='H' %}selected{% endif %}>Hourly</option>
+        <option value="D" {% if freq=='D' %}selected{% endif %}>Daily</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Mulai</label>
+      <input type="date" name="start" class="form-control" value="{{ start if start else '' }}">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Sampai</label>
+      <input type="date" name="end" class="form-control" value="{{ end if end else '' }}">
+    </div>
+
+    <div class="col-md-3 d-flex gap-2">
+      <button class="btn btn-primary w-100" type="submit">Terapkan</button>
+      <a class="btn btn-outline-secondary w-100" href="{{ url_for('index') }}">Reset</a>
+    </div>
+  </div>
+</form>
+
+<div class="row g-3 mt-1">
+  <div class="col-md-3">
+    <div class="kpi">
+      <div class="kpi-label">Total Energi</div>
+      <div class="kpi-value">{{ "{:,.2f}".format(total_kwh).replace(",", "X").replace(".", ",").replace("X", ".") }} kWh</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="kpi">
+      <div class="kpi-label">Rata-rata</div>
+      <div class="kpi-value">{{ "{:,.2f}".format(avg_kwh).replace(",", "X").replace(".", ",").replace("X", ".") }} kWh</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="kpi">
+      <div class="kpi-label">Jumlah Anomali</div>
+      <div class="kpi-value">{{ anomaly_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="kpi">
+      <div class="kpi-label">Estimasi Biaya</div>
+      <div class="kpi-value">Rp {{ "{:,}".format(biaya).replace(",", ".") }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-2">
+  <div class="col-12">
+    <div class="card p-3 chart-card">
+      {{ charts.ts | safe }}
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card p-3 chart-card">
+      {{ charts.hist | safe }}
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card p-3 chart-card">
+      {{ charts.weekday | safe }}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
